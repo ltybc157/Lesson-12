@@ -122,68 +122,76 @@ window.addEventListener('DOMContentLoaded', function () {
                 more.classList.remove('more-splash');
                 document.body.style.overflow = '';
             });
-
-            // Form
-            let message = { // создаём обьект который будет передавать в формате текста// обьект с сообщениями
-                loading: 'Загрузка...', // эта строка будет показыватьть когда наша строка пока не обработалась
-                success: 'Спасибо! Скоро мы с вами свяжемся !', // это строка которая благодарит пользователя который оставил заявку
-                failure: 'Что-то пошло не так...' // строка которая говарит что то пошло не так
-            };
-
-            let form = document.getElementsByClassName('main-form')[0], //вызываем форму обратной связи 
-                formBottom = document.getElementById('form'),
-                input = form.getElementsByTagName('input'), //вызываем input формы обратной связи
-                statusMessage = document.createElement('div'); //создаём новый div на странице
-            statusMessage.classList.add('status'); // добавляем класс элементу div
-
-            function sendForm(elem) {
-                elem.addEventListener('submit', function(e) { // мы вешаем обработчик событий на форму которую вызвали (form) не на кнопку а на форму которая отправляет данные который ввел пользоватеть
-                            e.preventDefault(); // отменяем стандартное поведение браузера принабирании в форме страница перезагружается
-                            elem.appendChild(statusMessage); //добавляем новый div в форму обратного вызова
-                            let formData = new FormData(elem);
-
-                            function postData(data) {
-
-                                return new Promise(function (resolve, reject) {
-                                    let request = new XMLHttpRequest(); 
-                                    request.open('POST', 'server.php'); 
-                                    request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); //запрос к серверу 1 задаём метод обращения 2 аргументом задаём куда обращатся в кадировке  charset=utf-8
-                                      
-                                    request.onreadystatechange = function() {
-                                    if (request.readyState < 4) {
-                                        resolve()
-                                    } else if (request.readyState === 4) {
-                                        if (request.status == 200 && request.status < 3)
-                                            resolve()
-                                    }
-                                     else {
-                                         reject()
-                                     }
-                                }
-                           }
-                            
-                           request.send(data);
-                        })
+            	//Form
+    
+    let message = {
+        loading: "Загрузка...",
+        sucsess: "Спасибо! Скоро мы с Вами свяжемся!",
+        failure: "Что-то пошло не так..."
+    };
+    
+    let form = document.querySelector('.main-form'),
+        formDown = document.querySelector('#form'),
+        input = form.getElementsByTagName ('input'),
+        statusMessage = document.createElement('div');
+         
+    
+        statusMessage.classList.add('status');
+    
+    function sendForm(elem){
+    
+        elem.addEventListener('submit', function (event) {
+            event.preventDefault();
+            elem.appendChild(statusMessage);
+        
+            let formData = new FormData(elem);
+        
+        function postData() {
+            return new Promise(function (resolve, reject) {
+                let request = new XMLHttpRequest();
+                request.open('POST', 'server.php');
+                request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+        
+                request.onreadystatechange = function () {
+                    if(request.readyState < 4) {
+                        resolve();
+                    } else if (request.readyState === 4) {
+                        if (request.status == 200 && request.status < 300) {
+                            resolve();
+                        } else {
+                            reject();
+                        }
                     }
-                     
-                    function crearInput() {
-                        for (let i = 0; i < input.length; i++) {// перещитываем все input     
-                            input[i].value = ''; //для отчистки всех input
-                         }
-                    }
-
-                    postData(formData)
-                         .then(()=> statusMessage.innerHTML =message.loading)
-                         .then(()=> {
-                             thanksModal.style.display = 'block';
-                             mainModal.style.display = 'none';
-                             statusMessage.innerHTML = '';
-                         })   
-                         .catch(()=> statusMessage.innerHTML = message.failure)
-                         .then(clearInput)
-
-
+                };
+        
+                let obj = {};
+                formData.forEach (function (value, key) {
+                    obj[key] = value;
+                });
+                let json = JSON.stringify(obj);
+                request.send(json);
+    
+    
+            });
+        }
+        
+        function clearInput() {
+            for (let i = 0; i < input.length; i++) {
+                input[i].value = '';
+            }
+        }
+        
+        postData (formData)
+            .then (() => statusMessage.innerHTML = message.loading)
+            .then (() => statusMessage.innerHTML = message.sucsess)
+            .catch (() => statusMessage.innerHTML = message.failure)
+            .then (clearInput);
+        });
+    
+    
+    }
+    
     sendForm(form);
-    sendForm(formBottom);
-  
-                                });
+    sendForm(formDown);
+
+ });
